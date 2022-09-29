@@ -29,7 +29,7 @@ public class State {
 			/* this.food = 0; 
 			score = new int[2];
 			score[0] = 0; score[1] = 0; */
-			board = new char[Width][Height];
+			board = new char[Height][Width];
 			
 			for(int i = 0; i < Height; i++) {
 				String line = text.readLine();
@@ -71,6 +71,19 @@ public class State {
 	
 	public void printCoordinates() {
 		System.out.println("Character A: " + agentA[0] + " - " + agentA[1]);
+		System.out.println("Character B: " + agentB[0] + " - " + agentB[1]);
+	}
+	
+	public State copy() {
+		State to_return = new State();
+		to_return.agentA = this.agentA;
+		to_return.agentB = this.agentB;
+		to_return.score = this.score;
+		to_return.turn = this.turn;
+		to_return.food = this.food;
+		to_return.board = this.board;
+		
+		return to_return;
 	}
 	
 }
