@@ -41,10 +41,12 @@ public class State {
 					if(characters[j] == 'A'){
 						agentA[0] = i;
 						agentA[1] = j;
+						board[i][j] = ' ';
 					}
 					else if(characters[j] == 'B'){
 						agentB[0] = i;
 						agentB[1] = j;
+						board[i][j] = ' ';
 					}
 					else if(characters[j] == '*'){
 						food++;
@@ -173,6 +175,38 @@ public class State {
 		}
 		turn++;
 		moves.add(action);
+		System.out.println(action);
+	}
+	
+	public boolean isLeaf() {
+		
+		if ( legalMoves(0).isEmpty() || legalMoves(0).indexOf("block") == 0 || legalMoves(1).indexOf("block") == 0 || legalMoves(1).isEmpty() || food <= 0 ) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public double value(int agent) {
+		
+		double value = 0;
+		
+		if ( isLeaf() ) {
+			if ( legalMoves(agent).isEmpty() ) {
+				value = -1;
+			}
+			else if ( legalMoves((agent + 1) % 2).isEmpty() ) {
+				value = 1;
+			}
+			else if ( score[agent] > score[(agent + 1) % 2] ) {
+				value = 1;
+			}
+			else if ( score[agent] < score[(agent + 1) % 2] ) ) {
+				value = -1;
+			}
+		}
+		
+		return value;
 	}
 	
 }
