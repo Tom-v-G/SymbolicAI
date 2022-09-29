@@ -8,6 +8,7 @@ public class State {
 	int[] score;
 	int turn;
 	int food;
+	Vector<String> moves;
 	
 	public State() {
 		this.agentA = new int[] {0,0};
@@ -15,6 +16,7 @@ public class State {
 		this.score = new int[] {0,0};
 		this.turn = 0;
 		this.food = 0;
+		this.moves = new Vector<String>();
 	}
 	
 	public void read(String file) {
@@ -61,7 +63,9 @@ public class State {
 		String s = "";
 		for(int i = 0; i < board.length; i++) {
 			for(int j = 0; j < board[i].length; j++) {
-				s+= board[i][j];
+				if(i == agentA[0] && j == agentA[1]) {s+= 'A';}
+				else if (i == agentB[0] && j == agentB[1]) {s+= 'B';}
+				else {s+= board[i][j];}
 			}
 			s+="\n";
 		}
@@ -74,16 +78,101 @@ public class State {
 		System.out.println("Character B: " + agentB[0] + " - " + agentB[1]);
 	}
 	
-	public State copy() {
+	public State copy() { //copies State variables to a new State
 		State to_return = new State();
 		to_return.agentA = this.agentA;
 		to_return.agentB = this.agentB;
 		to_return.score = this.score;
 		to_return.turn = this.turn;
 		to_return.food = this.food;
+		to_return.moves = this.moves;
 		to_return.board = this.board;
 		
 		return to_return;
+	}
+	
+	public Vector<String> legalMoves(int agent){
+		Vector<String> legal_moves = new Vector<String>(); //initialises string vector
+		int agent_coordinates[] = new int[] {0,0};
+		if(agent == 0) { //checks whose turn it is
+			agent_coordinates = agentA;
+		}
+		else if(agent == 1) {
+			agent_coordinates = agentB;
+		}
+		if(agent_coordinates[0] > 0) { //if agent is not against upper wall
+			if(board[agent_coordinates[0]-1][agent_coordinates[1]] != '#'){
+				legal_moves.add("up");
+			}
+		}
+		if(agent_coordinates[0] < board.length) { //if agent is not against lower wall
+			if(board[agent_coordinates[0]+1][agent_coordinates[1]] != '#'){
+				legal_moves.add("down");
+			}
+		}
+		if(agent_coordinates[1] > 0) { //if agent is not against left wall
+			if(board[agent_coordinates[0]][agent_coordinates[1]-1] != '#'){
+				legal_moves.add("left");
+			}
+		}
+		if(agent_coordinates[1] < board[0].length) { //if agent is not against right wall
+			if(board[agent_coordinates[0]][agent_coordinates[1]+1] != '#'){
+				legal_moves.add("right");
+			}
+		}
+		if(board[agent_coordinates[0]][agent_coordinates[1]] == '*') { //if food
+			legal_moves.add("eat");
+		}
+		if(board[agent_coordinates[0]][agent_coordinates[1]] != '*' && board[agent_coordinates[0]][agent_coordinates[1]] != '#') { //if placing wall is legal
+			legal_moves.add("block"); 
+		}
+		
+		return legal_moves;
+	}
+	
+	public Vector<String> legalMoves(){
+		return legalMoves(turn % 2); 
+	}
+	
+	public void execute(String action) {
+	
+		if(action == "up") {
+			if(turn % 2 == 0) { agentA[0] = agentA[0] - 1; }
+			else { 				agentB[0] = agentB[0] - 1; }
+		}
+		if(action == "down") {
+			if(turn % 2 == 0) { agentA[0] = agentA[0] + 1; }
+			else { 				agentB[0] = agentB[0] + 1; }
+		}
+		if(action == "left") {
+			if(turn % 2 == 0) { agentA[1] = agentA[1] - 1; }
+			else { 				agentB[1] = agentB[1] - 1; }
+		}
+		if(action == "right") {
+			if(turn % 2 == 0) { agentA[1] = agentA[1] + 1; }
+			else { 				agentB[1] = agentB[1] + 1; }
+		}
+		
+		if(action == "eat") {
+			if(turn % 2 == 0) { 
+				board[agentA[0]][agentA[1]] = ' ';
+				food--;
+				score[0]++;
+			}
+			else { 
+				board[agentB[0]][agentB[1]] = ' ';
+				food--;
+				score[1]++;
+			}
+		}
+		
+		if(action == "block") {
+			if(turn % 2 == 0) { board[agentA[0]][agentA[1]] = '#';}
+			else { 				board[agentB[0]][agentB[1]] = '#';}
+		
+		}
+		turn++;
+		moves.add(action);
 	}
 	
 }
