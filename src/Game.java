@@ -20,17 +20,56 @@ public class Game {
 	public State minimax(State s, int forAgent, int maxDepth, int depth) {
 		double INF = 99999;
 		
-		if ( depth == maxDepth || s.isLeaf() ) {
+		if ( depth == maxDepth || s.isLeaf()) {
 			return s;
 		}
-		else if ( ( s.turn % 2 ) == forAgent ) { //max
+
+		else if ( ( (depth + forAgent) % 2 ) == forAgent ) { //max
 			double g = -INF;
+			State bestState = new State();
+			String bestMove = "";
 			for (String m: s.legalMoves(forAgent)) {
 				State copyS = s.copy();
-				g = Math.max(g, minimax(copyS, forAgent, maxDepth, depth).value(forAgent));
-				
+				copyS.execute(m);
+				State minimaxS = minimax(copyS, forAgent, maxDepth, depth + 1); 
+				if(minimaxS.value(forAgent) > g){
+					g = minimaxS.value(forAgent);
+					bestState = minimaxS;
+					bestMove = m;
+				}
 			}
-		}	
+			if(depth == 0){
+				s.execute(bestMove);
+				return s;
+			}
+			return bestState;			
+		}
+	
+		else if ( ((depth + forAgent) % 2) != forAgent) { //min
+			double g = INF;
+			int newAgent = (forAgent+1) % 2;
+			State worstState = new State();
+			for (String m: s.legalMoves(newAgent)) {
+				State copyS = s.copy();
+				copyS.execute(m);
+				State minimaxS = minimax(copyS, newAgent, maxDepth, depth + 1); 
+				if(minimaxS.value(forAgent) < g){
+					g = minimaxS.value(forAgent);
+					worstState = minimaxS;
+				}
+			}
+
+			return worstState;
+
+		}
+
+		else {
+			System.out.println("Oepsiewoepsie");
+			return s;
+		}
+	}
+		
+		
 //			Vector<double> values = new Vector<double>();
 //			for ( String m: s.legalMoves(forAgent) ) {
 //				State copyS = s.copy();
@@ -49,6 +88,6 @@ public class Game {
 //			}
 //		}
 		
-	}
+	
 	
 }
