@@ -201,7 +201,7 @@ public class State {
 			else if ( score[agent] > score[(agent + 1) % 2] ) {
 				value = 1;
 			}
-			else if ( score[agent] < score[(agent + 1) % 2] ) ) {
+			else if ( score[agent] < score[(agent + 1) % 2] ) {
 				value = -1;
 			}
 		}
