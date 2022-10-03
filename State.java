@@ -22,6 +22,14 @@ public class State implements Cloneable{
 	public int getTurn(){
 		return this.turn; 
 	}
+	
+	public int[] getScore(){
+		return this.score;
+	}
+
+	public void changeScore(int agent, int toAdd){
+		score[agent] += toAdd;
+	}
 
 	public void changeBoard(int i, int j, char C) {
 		board[i][j] = C;
@@ -129,6 +137,9 @@ public class State implements Cloneable{
 		else if(agent == 1) {
 			agent_coordinates = agentB;
 		}
+		if(board[agent_coordinates[0]][agent_coordinates[1]] == '*') { //if food
+			legal_moves.add("eat");
+		}
 		if(agent_coordinates[0] > 0) { //if agent is not against upper wall
 			if(board[agent_coordinates[0]-1][agent_coordinates[1]] != '#'){
 				legal_moves.add("up");
@@ -148,9 +159,6 @@ public class State implements Cloneable{
 			if(board[agent_coordinates[0]][agent_coordinates[1]+1] != '#'){
 				legal_moves.add("right");
 			}
-		}
-		if(board[agent_coordinates[0]][agent_coordinates[1]] == '*') { //if food
-			legal_moves.add("eat");
 		}
 		if(board[agent_coordinates[0]][agent_coordinates[1]] != '*' && board[agent_coordinates[0]][agent_coordinates[1]] != '#') { //if placing wall is legal
 			legal_moves.add("block"); 
@@ -220,10 +228,10 @@ public class State implements Cloneable{
 		double value = 0;
 		
 		if ( isLeaf() ) {
-			if ( legalMoves(agent).isEmpty() ) {
+			if ( legalMoves(agent).isEmpty() || legalMoves(agent).indexOf("block") == 0) {
 				value = -1;
 			}
-			else if ( legalMoves((agent + 1) % 2).isEmpty() ) {
+			else if ( legalMoves((agent + 1) % 2).isEmpty() || legalMoves((agent + 1) % 2).indexOf("block") == 0) {
 				value = 1;
 			}
 			else if ( score[agent] > score[(agent + 1) % 2] ) {

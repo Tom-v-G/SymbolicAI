@@ -1,18 +1,33 @@
+import java.util.*;
+
 public class Main {
 	public static void main(String[] args) {
 		String file = "data/board.txt";
+		Vector<String> Test = new Vector<String>();
+		//Test.add("block");
+		Test.add("test2");
+		System.out.println(Test.indexOf("block"));
 		Game g=new Game();
 		g.test();
 //		State hoi = new State();
 //		hoi.read(file);
-//		
+////      	
 //		System.out.println(hoi.toString());
 //		State test =  hoi.Copy();
-//		test.changeBoard(1, 1, 'G');
-//		System.out.println(test.toString());
-//		System.out.println(hoi.toString());
+////		test.changeBoard(1, 1, 'G');
+////		System.out.println(test.toString());
+////		System.out.println(hoi.toString());
+//		
+//		System.out.println(Arrays.toString(hoi.getScore()));
+//		hoi.changeScore(0, 5);
+//		System.out.println(Arrays.toString(hoi.getScore()));
+//		System.out.println(Arrays.toString(test.getScore()));
 
 
+//		System.out.println(hoi.getTurn());
+//		hoi.execute("up");
+//		System.out.println(hoi.getTurn());
+//		System.out.println(test.getTurn());		
 //		hoi.printCoordinates();
 //		
 //		System.out.println("\nTest 1\n");
