@@ -140,6 +140,9 @@ public class State implements Cloneable{
 		if(board[agent_coordinates[0]][agent_coordinates[1]] == '*') { //if food
 			legal_moves.add("eat");
 		}
+		if(board[agent_coordinates[0]][agent_coordinates[1]] != '*' && board[agent_coordinates[0]][agent_coordinates[1]] != '#') { //if placing wall is legal
+			legal_moves.add("block"); 
+		}
 		if(agent_coordinates[0] > 0) { //if agent is not against upper wall
 			if(board[agent_coordinates[0]-1][agent_coordinates[1]] != '#'){
 				legal_moves.add("up");
@@ -160,9 +163,7 @@ public class State implements Cloneable{
 				legal_moves.add("right");
 			}
 		}
-		if(board[agent_coordinates[0]][agent_coordinates[1]] != '*' && board[agent_coordinates[0]][agent_coordinates[1]] != '#') { //if placing wall is legal
-			legal_moves.add("block"); 
-		}
+		
 		
 		return legal_moves;
 	}
@@ -210,15 +211,24 @@ public class State implements Cloneable{
 		}
 		turn++;
 		moves.add(action);
+//		System.out.print(" score 0: " + score[0]);
+//		System.out.print(" score 1: " + score[1]);
 		//System.out.println(action);
 		//System.out.println(this.toString());
 	}
 	
 	public boolean isLeaf() {
 		
-		if ( legalMoves(0).isEmpty() || legalMoves(0).indexOf("block") == 0 || legalMoves(1).indexOf("block") == 0 || legalMoves(1).isEmpty() || food <= 0 ) {
+		if ( legalMoves(0).isEmpty() || legalMoves(1).isEmpty() || food <= 0 ) {
+			return true;
+		} 
+		if (legalMoves(0).lastElement() == "block" || legalMoves(1).lastElement() == "block") {
 			return true;
 		}
+		
+//		if ( legalMoves(0).isEmpty() || legalMoves(0).indexOf("block") == 0 || legalMoves(1).indexOf("block") == 0 || legalMoves(1).isEmpty() || food <= 0 ) {
+//			return true;
+//		}  
 		
 		return false;
 	}
@@ -228,10 +238,10 @@ public class State implements Cloneable{
 		double value = 0;
 		
 		if ( isLeaf() ) {
-			if ( legalMoves(agent).isEmpty() || legalMoves(agent).indexOf("block") == 0) {
+			if ( legalMoves(agent).isEmpty() || legalMoves(agent).lastElement() == "block") {
 				value = -1;
 			}
-			else if ( legalMoves((agent + 1) % 2).isEmpty() || legalMoves((agent + 1) % 2).indexOf("block") == 0) {
+			else if ( legalMoves((agent + 1) % 2).isEmpty() || legalMoves((agent + 1 ) % 2 ).lastElement() == "block" ) {
 				value = 1;
 			}
 			else if ( score[agent] > score[(agent + 1) % 2] ) {

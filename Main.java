@@ -2,13 +2,12 @@ import java.util.*;
 
 public class Main {
 	public static void main(String[] args) {
-		String file = "data/board.txt";
-		Vector<String> Test = new Vector<String>();
-		//Test.add("block");
-		Test.add("test2");
-		System.out.println(Test.indexOf("block"));
+		
+		String file = "data/board2.txt";
+		
 		Game g=new Game();
 		g.test();
+		
 //		State hoi = new State();
 //		hoi.read(file);
 ////      	

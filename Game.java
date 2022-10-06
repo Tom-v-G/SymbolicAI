@@ -4,7 +4,7 @@ public class Game {
 	State b;
 	public Game() {
 		b=new State();
-		b.read("data/test_board_1.txt");
+		b.read("data/board.txt");
 	}
 	public void test() {
 		
@@ -16,11 +16,18 @@ public class Game {
 		//	b.execute(b.legalMoves().get((int)(Math.random()*b.legalMoves().size())));
 		//}
 		
+//		for (int i = 0; i < 30; i++) {
+//			System.out.println(b.toString());
+//			System.out.println("Legal moves for agent " + (b.getTurn() % 2) +": " + b.legalMoves());
+//			//b = minimax(b, (b.getTurn() % 2), 13, 0);
+//			b = alfabeta(b, (b.getTurn() % 2), 15, 0, -1, 1);
+//		}
+		
 		while(!b.isLeaf()){
 			System.out.println(b.toString());
 			System.out.println("Legal moves for agent " + (b.getTurn() % 2) +": " + b.legalMoves());
 			//b = minimax(b, (b.getTurn() % 2), 13, 0);
-			b = alfabeta(b, (b.getTurn() % 2), 20, 0, -1, 1);
+			b = alfabeta(b, (b.getTurn() % 2), 15, 0, -1, 1);
 		}
 
 	}
@@ -45,7 +52,7 @@ public class Game {
 					bestState = minimaxS.Copy();
 					bestMove = m;
 				}
-//				else if (minimaxS.value(forAgent) == g){ //if values are the same, ddo a random move
+//				else if (minimaxS.value(forAgent) == g){ //if values are the same, do a random move
 //					if(Math.random() > 0.5){
 //						g = minimaxS.value(forAgent);
 //						bestState = minimaxS.Copy();
@@ -56,7 +63,6 @@ public class Game {
 			if(depth == 0){
 				s.execute(bestMove);
 				System.out.println("The best move is: " + bestMove);
-				//System.out.println(s.toString());
 				return s;
 			}
 			return bestState;			
@@ -122,7 +128,6 @@ public class Game {
 			if(depth == 0){
 				s.execute(bestMove);
 				System.out.println("The best move is: " + bestMove);
-				//System.out.println(s.toString());
 				return s;
 			}
 			return bestState;			
