@@ -10,47 +10,31 @@ public class Game {
 	}
 	public void test() {
 		
-		//System.out.println(minimax(b, b.getTurn(), 11, 0));
-		
-		//while (!b.isLeaf()){
-		//	System.out.println(b.toString());
-		//	System.out.println("Legal moves for agent with turn:"+b.legalMoves());
-		//	b.execute(b.legalMoves().get((int)(Math.random()*b.legalMoves().size())));
-		//}
-		
-//		for (int i = 0; i < 30; i++) {
-//			System.out.println(b.toString());
-//			System.out.println("Legal moves for agent " + (b.getTurn() % 2) +": " + b.legalMoves());
-//			//b = minimax(b, (b.getTurn() % 2), 13, 0);
-//			b = alfabeta(b, (b.getTurn() % 2), 15, 0, -1, 1);
+//		for (int i = 1; i < 19; i++) {
+//			
+//			b=new State();
+//			b.read("data/board.txt");
 //	
-		
-		for (int i = 1; i < 19; i++) {
-			
-			b=new State();
-			b.read("data/board.txt");
-			
-			nodes = 0;
-			
-			//System.out.println(b.toString());
-			//System.out.println("Legal moves for agent " + (b.getTurn() % 2) +": " + b.legalMoves());
-			
-			//b = alfabeta(b, (b.getTurn() % 2), i, 0, -1, 1);
-			b = minimax(b, (b.getTurn() % 2), i, 0);
-			
-			System.out.println("int : " + i +" nodes visited: " + nodes);
-			
-			//System.out.println(b.toString());
-		}
-		
-		
-		
-//		while(!b.isLeaf()){
-//			System.out.println(b.toString());
-//			System.out.println("Legal moves for agent " + (b.getTurn() % 2) +": " + b.legalMoves());
-//			//b = minimax(b, (b.getTurn() % 2), 13, 0);
-//			b = alfabeta(b, (b.getTurn() % 2), 15, 0, -1, 1);
+//			nodes = 0;
+//			
+//			//System.out.println(b.toString());
+//			//System.out.println("Legal moves for agent " + (b.getTurn() % 2) +": " + b.legalMoves());
+//			
+//			b = alfabeta(b, (b.getTurn() % 2), i, 0, -1, 1);
+//			//b = minimax(b, (b.getTurn() % 2), i, 0);
+//			
+//			System.out.println("int : " + i +" nodes visited: " + nodes);
+//			
+//			//System.out.println(b.toString());
 //		}
+		
+		
+		while(!b.isLeaf()){
+			System.out.println(b.toString());
+			System.out.println("Legal moves for agent " + (b.getTurn() % 2) +": " + b.legalMoves());
+			b = minimax(b, (b.getTurn() % 2), 13 , 0);
+			//b = alfabeta(b, (b.getTurn() % 2), 15, 0, -1, 1);
+		}
 
 	}
 	
@@ -111,7 +95,7 @@ public class Game {
 		}
 
 		else {
-			System.out.println("Oepsiewoepsie");
+			System.out.println("ERROR");
 			return s;
 		}
 	}
@@ -182,7 +166,7 @@ public class Game {
 		}
 
 		else {
-			System.out.println("Oepsiewoepsie");
+			System.out.println("ERROR");
 			return s;
 		}
 	}

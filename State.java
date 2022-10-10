@@ -2,7 +2,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
-public class State implements Cloneable{
+public class State {
 	private char[][] board; 
 	private int[] agentA, agentB;
 	private int[] score;
@@ -44,9 +44,6 @@ public class State implements Cloneable{
 			int Width = Integer.parseInt(s.split(" ")[0]);
 			int Height = Integer.parseInt(s.split(" ")[1]);
 			
-			/* this.food = 0; 
-			score = new int[2];
-			score[0] = 0; score[1] = 0; */
 			board = new char[Height][Width];
 			
 			for(int i = 0; i < Height; i++) {
@@ -96,11 +93,6 @@ public class State implements Cloneable{
 		System.out.println("Character B: " + agentB[0] + " - " + agentB[1]);
 	}
 	
-//	protected Object clone() throws CloneNotSupportedException{
-//		State Copy = (State) super.clone();
-//		Copy.moves = (Vector) moves.clone();
-//		return Copy;
-//	}
 
 	public State Copy() { //copies State variables to a new State
 		int[] newAgentA = new int[agentA.length];
@@ -211,10 +203,6 @@ public class State implements Cloneable{
 		}
 		turn++;
 		moves.add(action);
-//		System.out.print(" score 0: " + score[0]);
-//		System.out.print(" score 1: " + score[1]);
-		//System.out.println(action);
-		//System.out.println(this.toString());
 	}
 	
 	public boolean isLeaf() {
@@ -222,14 +210,6 @@ public class State implements Cloneable{
 		if ( legalMoves(0).isEmpty() || legalMoves(1).isEmpty() || food <= 0 ) {
 			return true;
 		} 
-		if (legalMoves(0).lastElement() == "block" || legalMoves(1).lastElement() == "block") {
-			return true;
-		}
-		
-//		if ( legalMoves(0).isEmpty() || legalMoves(0).indexOf("block") == 0 || legalMoves(1).indexOf("block") == 0 || legalMoves(1).isEmpty() || food <= 0 ) {
-//			return true;
-//		}  
-		
 		return false;
 	}
 	
