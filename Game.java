@@ -1,3 +1,4 @@
+// Tom van Gelooven en Lisa Schouten
 import java.util.Vector;
 
 public class Game {
