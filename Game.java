@@ -2,9 +2,11 @@ import java.util.Vector;
 
 public class Game {
 	State b;
+	int nodes = 0;
 	public Game() {
 		b=new State();
 		b.read("data/board.txt");
+		
 	}
 	public void test() {
 		
@@ -21,18 +23,39 @@ public class Game {
 //			System.out.println("Legal moves for agent " + (b.getTurn() % 2) +": " + b.legalMoves());
 //			//b = minimax(b, (b.getTurn() % 2), 13, 0);
 //			b = alfabeta(b, (b.getTurn() % 2), 15, 0, -1, 1);
-//		}
+//	
 		
-		while(!b.isLeaf()){
-			System.out.println(b.toString());
-			System.out.println("Legal moves for agent " + (b.getTurn() % 2) +": " + b.legalMoves());
-			//b = minimax(b, (b.getTurn() % 2), 13, 0);
-			b = alfabeta(b, (b.getTurn() % 2), 15, 0, -1, 1);
+		for (int i = 1; i < 19; i++) {
+			
+			b=new State();
+			b.read("data/board.txt");
+			
+			nodes = 0;
+			
+			//System.out.println(b.toString());
+			//System.out.println("Legal moves for agent " + (b.getTurn() % 2) +": " + b.legalMoves());
+			
+			//b = alfabeta(b, (b.getTurn() % 2), i, 0, -1, 1);
+			b = minimax(b, (b.getTurn() % 2), i, 0);
+			
+			System.out.println("int : " + i +" nodes visited: " + nodes);
+			
+			//System.out.println(b.toString());
 		}
+		
+		
+		
+//		while(!b.isLeaf()){
+//			System.out.println(b.toString());
+//			System.out.println("Legal moves for agent " + (b.getTurn() % 2) +": " + b.legalMoves());
+//			//b = minimax(b, (b.getTurn() % 2), 13, 0);
+//			b = alfabeta(b, (b.getTurn() % 2), 15, 0, -1, 1);
+//		}
 
 	}
 	
 	public State minimax(State s, int forAgent, int maxDepth, int depth) {
+		nodes++;
 		double INF = 99999;		
 		if ( depth == maxDepth || s.isLeaf()) {
 			return s;
@@ -94,6 +117,7 @@ public class Game {
 	}
 		
 	public State alfabeta(State s, int forAgent, int maxDepth, int depth, double alfa, double beta) {
+		nodes++;
 		double INF = 99999;		
 		if ( depth == maxDepth || s.isLeaf()) {
 			return s;
