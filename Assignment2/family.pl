@@ -1,3 +1,4 @@
+% Tom van Gelooven s1853686 en Lisa Schouten s3162915
 %A typical family database.
 male(joost).
 male(sacha).
