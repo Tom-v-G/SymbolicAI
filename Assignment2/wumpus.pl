@@ -24,6 +24,7 @@ adjacent(L):- robot(X), link(X, L).
 
 move(L):- adjacent(L), retractall(robot(_)), assertz(robot(L)).
 
+% originele suggest voor 3.13
 %suggest(L):- goal(L), adjacent(L).
 
 append([], X, X).
