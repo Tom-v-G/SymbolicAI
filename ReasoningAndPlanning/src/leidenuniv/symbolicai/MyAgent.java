@@ -34,8 +34,43 @@ public class MyAgent extends Agent {
 		//substitution is the one we are currently building recursively.
 		//conditions is the list of conditions you  still need to find a subst for (this list shrinks the further you get in the recursion).
 		//facts is the list of predicates you need to match against (find substitutions so that a predicate form the conditions unifies with a fact)
-
-		return false;
+		
+		if(conditions.isEmpty()) {
+			allSubstitutions.add(substitution);
+			return true;
+		}
+		Predicate currentCondition = conditions.firstElement();
+		conditions.remove(0);
+		
+		currentCondition = substitute(currentCondition, substitution);
+		
+		HashMap<String, String> currentSubstitution = new HashMap<String, String>();
+		boolean subCheck = false; //
+		
+		if(currentCondition.not || currentCondition.eql) {
+			//loop over feiten, haal alle namen van termen er uit 
+			// voeg alle substituties toe voor not of voor eql afhankelijk van casus
+		}
+		
+		else {
+			for (Predicate fact: facts.values()) {
+				currentSubstitution = unifiesWith(currentCondition, fact);
+				if (currentSubstitution != null) {
+					for (HashMap.Entry<String, String> sub : currentSubstitution.entrySet()) {
+						substitution.put(sub.getKey(), sub.getValue());
+					}
+					if( findAllSubstitions(allSubstitutions, substitution, conditions, facts)) {
+						subCheck = true;
+					}
+				}
+				
+			}
+		}
+		
+		
+		
+		
+		return subCheck;
 	}
 
 	@Override
@@ -46,7 +81,31 @@ public class MyAgent extends Agent {
 		//Please note because f is bound and p potentially contains the variables, unifiesWith is NOT symmetrical
 		//So: unifiesWith("human(X)","human(joost)") returns X=joost, while unifiesWith("human(joost)","human(X)") returns null 
 		//If no subst is found it returns null
-		return null;
+		
+		if(! p.getName().equals(f.getName())) {
+			return null;
+		}
+		
+		HashMap<String, String> substitutions = new HashMap<String, String>();
+		Vector<Term> fTerms = f.getTerms();
+		Vector<Term> pTerms = p.getTerms();
+		
+		if(fTerms.size() != pTerms.size()) { //predicates of unequal size can never unify
+			return null;
+		}
+		
+		for (int i = 0; i < fTerms.size(); i++) {
+			if(pTerms.get(i).var) {
+				substitutions.put(pTerms.get(i).term, fTerms.get(i).term); //if the p-term is a variable, add the constant term of f as a valid substitution
+			}
+			else {
+				if (! pTerms.get(i).term.equals(fTerms.get(i).term)) {
+					return null; //if a constant term of p is different from one in f there is no valid substitution
+				}
+			}
+		}
+		
+		return substitutions;
 	}
 
 	@Override
@@ -54,7 +113,14 @@ public class MyAgent extends Agent {
 		// Substitutes all variable terms in predicate <old> for values in substitution <s>
 		//(only if a key is present in s matching the variable name of course)
 		//Use Term.substitute(s)
-		return null;
+		
+		Predicate copy = new Predicate(old.toString()); 
+		
+		for (Term X : copy.getTerms()) {
+			X.substitute(s);
+		}
+		
+		return copy;
 	}
 
 	@Override
