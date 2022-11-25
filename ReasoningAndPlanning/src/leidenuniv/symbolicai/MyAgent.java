@@ -21,7 +21,63 @@ public class MyAgent extends Agent {
 		//These are then processed by processFacts() (which is already implemented for you)
 		//HINT: You should assume that forwardChain only allows *bound* predicates to be added to the facts list for now.
 		
-		return null;
+		HashMap<String, Predicate> facts = new HashMap<String, Predicate>();
+		HashMap<String, Predicate> operators = new HashMap<String, Predicate>(); //for operators which are not used in inference
+		Vector<Sentence> rules = new Vector<Sentence>();
+		
+		//first add all facts to a HashMap and add rules to a vector for looping
+		for(Sentence sentence : kb.rules()) {
+			if(sentence.conditions.isEmpty()) { //a fact is a rule without conditions
+				for(Predicate conclusion: sentence.conclusions) {
+					if(conclusion.act || conclusion.adopt || conclusion.drop || conclusion.del) { //operators are stored separately
+						if(!operators.containsKey(conclusion.toString())) { //only add new operators
+							operators.put(conclusion.toString(), conclusion);
+						}
+					}
+					else if(!facts.containsKey(conclusion.toString())) { //only add new facts
+						facts.put(conclusion.toString(), conclusion);
+					}
+				}
+			}
+			else { //if there are conditions
+				rules.add(sentence);
+			}
+		}
+		
+		//loop over rules until no new facts are added
+		boolean factAdded = true;
+		do {
+			factAdded = false;
+			for(Sentence rule: rules) {
+				Vector<HashMap<String, String>> allSubstitutions = new Vector<HashMap<String, String>>();
+				HashMap<String, String> substitution = new HashMap<String, String>();
+				if(findAllSubstitions(allSubstitutions, substitution, rule.conditions, facts)) {
+					for(HashMap<String, String> possibleSubstitution : allSubstitutions) {
+						for(Predicate conclusion: rule.conclusions) {
+							Predicate newFact = substitute(conclusion, possibleSubstitution);
+							if(newFact.act || newFact.adopt || newFact.drop || newFact.del) { //operators are stored separately
+								if(!operators.containsKey(newFact.toString())) { //only add new operators
+									operators.put(newFact.toString(), newFact);									
+								}
+							}
+							else if(!facts.containsKey(newFact.toString())) { //only add new facts
+								facts.put(newFact.toString(), newFact);
+								factAdded = true; //new fact was added
+							}
+						}
+					}
+				}
+			}
+		} while(factAdded);
+
+		//TODO include addition operator
+		
+		//add facts and operators to KB
+		facts.putAll(operators); //merge HashMaps
+		Collection<Predicate> toBeAdded = facts.values(); //make a collection of Predicates
+		KB forwardChained = new KB(toBeAdded); //make KB with all inferred facts
+		
+		return forwardChained;
 	}
 
 	@Override
@@ -47,11 +103,45 @@ public class MyAgent extends Agent {
 		HashMap<String, String> currentSubstitution = new HashMap<String, String>();
 		boolean subCheck = false; //
 		
-		if(currentCondition.not || currentCondition.eql) {
-			//loop over feiten, haal alle namen van termen er uit 
-			// voeg alle substituties toe voor not of voor eql afhankelijk van casus
+		if(currentCondition.eql) {
+			for( Predicate fact: facts.values()) {
+				for ( Term factterm: fact.getTerms()) {
+					Predicate f = new Predicate("=(" + factterm.term + "," + factterm.term + ")");
+					currentSubstitution = unifiesWith(currentCondition, f);
+					if (currentSubstitution != null) {
+						for (HashMap.Entry<String, String> sub : currentSubstitution.entrySet()) {
+							substitution.put(sub.getKey(), sub.getValue());
+						}
+						if( findAllSubstitions(allSubstitutions, substitution, conditions, facts)) {
+							subCheck = true;
+						}
+					}
+				}
+			}
 		}
 		
+		else if(currentCondition.not) {
+			for( Predicate fact1: facts.values()) {
+				for( Predicate fact2: facts.values()) {
+					for ( Term factterm1: fact1.getTerms()) {
+						for ( Term factterm2: fact2.getTerms()) {
+							Predicate f = new Predicate("!=(" + factterm1.term + "," + factterm2.term + ")");
+							currentSubstitution = unifiesWith(currentCondition, f);
+							if (currentSubstitution != null) {
+								for (HashMap.Entry<String, String> sub : currentSubstitution.entrySet()) {
+									substitution.put(sub.getKey(), sub.getValue());
+								}
+								if( findAllSubstitions(allSubstitutions, substitution, conditions, facts)) {
+									subCheck = true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		//als niet =(X,Y) of !=(X,Y)
 		else {
 			for (Predicate fact: facts.values()) {
 				currentSubstitution = unifiesWith(currentCondition, fact);
@@ -63,12 +153,8 @@ public class MyAgent extends Agent {
 						subCheck = true;
 					}
 				}
-				
 			}
 		}
-		
-		
-		
 		
 		return subCheck;
 	}
@@ -87,13 +173,13 @@ public class MyAgent extends Agent {
 		}
 		
 		HashMap<String, String> substitutions = new HashMap<String, String>();
+		
 		Vector<Term> fTerms = f.getTerms();
 		Vector<Term> pTerms = p.getTerms();
 		
 		if(fTerms.size() != pTerms.size()) { //predicates of unequal size can never unify
 			return null;
 		}
-		
 		for (int i = 0; i < fTerms.size(); i++) {
 			if(pTerms.get(i).var) {
 				substitutions.put(pTerms.get(i).term, fTerms.get(i).term); //if the p-term is a variable, add the constant term of f as a valid substitution
@@ -103,7 +189,7 @@ public class MyAgent extends Agent {
 					return null; //if a constant term of p is different from one in f there is no valid substitution
 				}
 			}
-		}
+		}		
 		
 		return substitutions;
 	}
