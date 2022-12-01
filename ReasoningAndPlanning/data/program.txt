@@ -14,8 +14,14 @@ nexttolock(X,K)&haskey(K)&location(X)>_open(X,K)
 
 location(X)&link(X,Y)>_goto(X,Y)
 
-nexttolock(X,K)&location(X)&!haskey(K)>*haveKey(K)
+#nexttolock(X,K)&location(X)&!haskey(K)>*haveKey(K)
+
+#nexttolock(X,K)&location(X)&!haskey(K)&keylocation(Y,K)>*grab(Y,K)
+
+keylocation(X,K) & location(X) &!haskey(K) >*grab(X,K)
 
 haskey(K) & nexttolock(X,K) & location(X) >*open(X,K)
+
+location(X) & link(X,Y) & !visited(Y) > *location(Y)
 
 location(X) & !exit >*findexit

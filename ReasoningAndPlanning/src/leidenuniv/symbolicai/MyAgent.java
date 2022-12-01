@@ -252,7 +252,17 @@ public class MyAgent extends Agent {
 		//Ends at maxDepth
 		//Predicate goal is the goal predicate to find a plan for.
 		//Return null if no plan is found.
-		return null;
+		System.out.println("Starting search");
+		Plan goalPlan = new Plan();
+		for(int i = 0; i < maxDepth; i++) {
+			System.out.println(i);
+			goalPlan = depthFirst(i+1, 0, kb, goal, new Plan());
+			if(goalPlan != null) {
+				break;
+			}
+		}
+		
+		return goalPlan;
 	}
 
 	@Override
@@ -263,6 +273,31 @@ public class MyAgent extends Agent {
 		//Returns (bubbles back through recursion) the plan when the state entails the goal predicate
 		//Returns null if capped or if there are no (more) actions to perform in one node (state)
 		//HINT: make use of think() and act() using the local state for the node in the search you are in.
+		if(depth == maxDepth) {
+			return null;
+		}
+		
+		KB currentBelieves = new KB().union(state);
+		KB currentDesires = new KB();
+		KB currentIntentions = new KB();
+		
+		think(currentBelieves, currentDesires, currentIntentions);
+		if(!currentDesires.contains(goal)) {
+			return partialPlan;
+		}
+		else {
+			for(Sentence s_intention : currentIntentions.rules()) {
+				Predicate intention = new Predicate(s_intention);
+				System.out.println(intention.toString());
+				KB actBelieves = new KB().union(currentBelieves);
+				KB actDesires = new KB().union(currentDesires);
+				Plan copyPlan = new Plan(partialPlan);
+				copyPlan.add(intention);
+				act(null, intention, actBelieves, actDesires);
+				return depthFirst(maxDepth, depth + 1, actBelieves, goal, copyPlan);	
+			}
+		}
+		
 		return null;
 	}
 }
