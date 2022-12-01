@@ -15,10 +15,10 @@ import leidenuniv.symbolicai.logic.Term;
 public abstract class Agent {
 	KB perceptRules,programRules,actionRules; //these are the static rules you get from loading your program
 	KB believes,desires, intentions;//these are dynamic facts, believes are facts, intentions are actions that are possible, desires are goal predicates
-	boolean HUMAN_DECISION=false;//change to false if you want the decide step to make the decision rather than you (check code there)
+	boolean HUMAN_DECISION=true;//change to false if you want the decide step to make the decision rather than you (check code there)
 	//boolean HUMAN_DECISION=true;//change to false if you want the decide step to make the decision rather than you (check code there)
-	//boolean DEBUG=true;
-	boolean DEBUG=false;
+	boolean DEBUG=true;
+	//boolean DEBUG=false;
 	
 	public Agent() {
 		believes=new KB();
@@ -62,7 +62,7 @@ public abstract class Agent {
 		//IMPORTANT: b d and i are changed as they are passed by reference.
 		//IMPORTANT: the reason think has b d and i as parameters is so that you can make clever use of think() when you implement planning later.
 		KB facts=forwardChain(programRules.union(b)); 
-		//System.out.println("THINK INFERENCE:\n"+facts);//uncomment this if you want to know what facts your forward chaining inference produces
+		System.out.println("THINK INFERENCE:\n"+facts);//uncomment this if you want to know what facts your forward chaining inference produces
 		processFacts(facts, b, d, i, DEBUG);
 	}
 	public Predicate decide(boolean humanActor) {

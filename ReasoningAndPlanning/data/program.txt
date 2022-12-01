@@ -13,3 +13,9 @@ keylocation(X,K)&location(X)>_grab(X,K)
 nexttolock(X,K)&haskey(K)&location(X)>_open(X,K)
 
 location(X)&link(X,Y)>_goto(X,Y)
+
+nexttolock(X,K)&location(X)&!haskey(K)>*haveKey(K)
+
+haskey(K) & nexttolock(X,K) & location(X) >*open(X,K)
+
+location(X) & !exit >*findexit

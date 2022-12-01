@@ -55,7 +55,7 @@ public class Predicate {
 		}
 	}
 	private void parsePred(String pred) {
-		//This parses the predicate name
+		//This parses the predicatnewFacte name
 		//It figures out if the predicate is a comparison (!= or =) reserved predicate, an addition, deletion or action, and then parses the name
 		if (pred.equals("!=")) {
 			not=true;

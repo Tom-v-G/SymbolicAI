@@ -28,14 +28,23 @@ public class MyAgent extends Agent {
 		//first add all facts to a HashMap and add rules to a vector for looping
 		for(Sentence sentence : kb.rules()) {
 			if(sentence.conditions.isEmpty()) { //a fact is a rule without conditions
-				for(Predicate conclusion: sentence.conclusions) {
-					if(conclusion.act || conclusion.adopt || conclusion.drop || conclusion.del) { //operators are stored separately
+				for(Predicate conclusion: sentence.conclusions) {			
+					if(conclusion.add) { //add predicates are added to fact kb
+						String toBeAdded = conclusion.toString();
+						Predicate addFact = new Predicate(toBeAdded.substring(1, toBeAdded.length()));
+						if(!facts.containsKey(addFact.toString())) { //only add new facts
+							facts.put(addFact.toString(), addFact);
+						}
+					}
+					if(conclusion.isAction()) { //operators are stored separately
 						if(!operators.containsKey(conclusion.toString())) { //only add new operators
 							operators.put(conclusion.toString(), conclusion);
+							//System.out.println(conclusion.toString() + " added to Operators");
 						}
 					}
 					else if(!facts.containsKey(conclusion.toString())) { //only add new facts
 						facts.put(conclusion.toString(), conclusion);
+						//System.out.println(conclusion.toString() + " added to Facts");
 					}
 				}
 			}
@@ -52,22 +61,36 @@ public class MyAgent extends Agent {
 				Vector<HashMap<String, String>> allSubstitutions = new Vector<HashMap<String, String>>();
 				HashMap<String, String> substitution = new HashMap<String, String>();
 				if(findAllSubstitions(allSubstitutions, substitution, rule.conditions, facts)) {
+					//System.out.println("Possible substitutions:" + allSubstitutions.toString());
 					for(HashMap<String, String> possibleSubstitution : allSubstitutions) {
 						for(Predicate conclusion: rule.conclusions) {
 							Predicate newFact = substitute(conclusion, possibleSubstitution);
-							if(newFact.act || newFact.adopt || newFact.drop || newFact.del) { //operators are stored separately
+							if(newFact.add) { //add predicates are added to fact kb
+								String toBeAdded = newFact.toString();
+								Predicate addFact = new Predicate(toBeAdded.substring(1, toBeAdded.length()));
+								if(!facts.containsKey(addFact.toString())) { //only add new facts
+									facts.put(addFact.toString(), addFact);
+									factAdded = true;
+								}
+							}
+							if(newFact.isAction()) { //operators are stored separately
 								if(!operators.containsKey(newFact.toString())) { //only add new operators
-									operators.put(newFact.toString(), newFact);									
+									operators.put(newFact.toString(), newFact);	
+									factAdded = true;
+									//System.out.println(newFact.toString() + " added to Operators");
 								}
 							}
 							else if(!facts.containsKey(newFact.toString())) { //only add new facts
 								facts.put(newFact.toString(), newFact);
 								factAdded = true; //new fact was added
+								//System.out.println(newFact.toString() + " added to Facts");
 							}
 						}
 					}
 				}
 			}
+			//System.out.println("Currently attained facts:");
+			//System.out.println(facts.toString());
 		} while(factAdded);
 
 		//TODO include addition operator
@@ -93,11 +116,12 @@ public class MyAgent extends Agent {
 		
 		if(conditions.isEmpty()) {
 			allSubstitutions.add(substitution);
+			//System.out.println("Added " + substitution.toString() + "to allSubstitutions\n");
 			return true;
 		}
 		Predicate currentCondition = conditions.firstElement();
-		conditions.remove(0);
-		
+		Vector<Predicate> copyConditions = new Vector<Predicate>(conditions);
+		copyConditions.remove(0);
 		currentCondition = substitute(currentCondition, substitution);
 		
 		HashMap<String, String> currentSubstitution = new HashMap<String, String>();
@@ -109,10 +133,11 @@ public class MyAgent extends Agent {
 					Predicate f = new Predicate("=(" + factterm.term + "," + factterm.term + ")");
 					currentSubstitution = unifiesWith(currentCondition, f);
 					if (currentSubstitution != null) {
+						HashMap<String, String> copySubstitution = new HashMap<String, String>(substitution); 
 						for (HashMap.Entry<String, String> sub : currentSubstitution.entrySet()) {
-							substitution.put(sub.getKey(), sub.getValue());
+							copySubstitution.put(sub.getKey(), sub.getValue());
 						}
-						if( findAllSubstitions(allSubstitutions, substitution, conditions, facts)) {
+						if( findAllSubstitions(allSubstitutions, copySubstitution, copyConditions, facts)) {
 							subCheck = true;
 						}
 					}
@@ -126,13 +151,16 @@ public class MyAgent extends Agent {
 					for ( Term factterm1: fact1.getTerms()) {
 						for ( Term factterm2: fact2.getTerms()) {
 							Predicate f = new Predicate("!=(" + factterm1.term + "," + factterm2.term + ")");
-							currentSubstitution = unifiesWith(currentCondition, f);
-							if (currentSubstitution != null) {
-								for (HashMap.Entry<String, String> sub : currentSubstitution.entrySet()) {
-									substitution.put(sub.getKey(), sub.getValue());
-								}
-								if( findAllSubstitions(allSubstitutions, substitution, conditions, facts)) {
-									subCheck = true;
+							if(f.not()) {  //prevents !=(X,X)
+								currentSubstitution = unifiesWith(currentCondition, f);
+								if (currentSubstitution != null) {
+									HashMap<String, String> copySubstitution = new HashMap<String, String>(substitution); 
+									for (HashMap.Entry<String, String> sub : currentSubstitution.entrySet()) {
+										copySubstitution.put(sub.getKey(), sub.getValue());
+									}
+									if( findAllSubstitions(allSubstitutions, copySubstitution, copyConditions, facts)) {
+										subCheck = true;
+									}
 								}
 							}
 						}
@@ -145,13 +173,20 @@ public class MyAgent extends Agent {
 		else {
 			for (Predicate fact: facts.values()) {
 				currentSubstitution = unifiesWith(currentCondition, fact);
-				if (currentSubstitution != null) {
-					for (HashMap.Entry<String, String> sub : currentSubstitution.entrySet()) {
-						substitution.put(sub.getKey(), sub.getValue());
-					}
-					if( findAllSubstitions(allSubstitutions, substitution, conditions, facts)) {
+				if(currentCondition.neg && currentSubstitution == null) {
+					HashMap<String, String> copySubstitution = new HashMap<String, String>(substitution); 
+					if( findAllSubstitions(allSubstitutions, copySubstitution, copyConditions, facts)) {
 						subCheck = true;
 					}
+				}
+				else if (!currentCondition.neg && currentSubstitution != null) { //if there are possible substitutions
+						HashMap<String, String> copySubstitution = new HashMap<String, String>(substitution); 
+						for (HashMap.Entry<String, String> sub : currentSubstitution.entrySet()) {
+							copySubstitution.put(sub.getKey(), sub.getValue());
+						}
+						if( findAllSubstitions(allSubstitutions, copySubstitution, copyConditions, facts)) {
+							subCheck = true;
+						}
 				}
 			}
 		}
@@ -189,7 +224,8 @@ public class MyAgent extends Agent {
 					return null; //if a constant term of p is different from one in f there is no valid substitution
 				}
 			}
-		}		
+		}
+		//System.out.println(p.toString() + " unifies with " + f.toString());
 		
 		return substitutions;
 	}

@@ -15,13 +15,15 @@ public class RunMe {
 		//Agent a=new MyAgent();
 		Agent a=new MyAgent();
 		//Load the rules and static knowledge for the different steps in the agent cycle
+		
 		a.loadKnowledgeBase("percepts", new File("data/percepts.txt"));
 		a.loadKnowledgeBase("program", new File("data/program.txt"));
 		a.loadKnowledgeBase("actions", new File("data/actions.txt"));
 		
 		//If you need to test on a simpler file, you may use this one and comment out all the other KBs:
-		//a.loadKnowledgeBase("program", new File("data/family.txt"));
-		
+//		a.loadKnowledgeBase("program", new File("data/family.txt"));
+//		System.out.println(a.forwardChain(a.programRules).toString());
+//		System.out.println("Done");
 		
 		Scanner io= new Scanner(System.in);
 		

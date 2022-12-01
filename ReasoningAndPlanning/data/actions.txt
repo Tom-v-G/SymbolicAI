@@ -6,6 +6,6 @@
 
 grab(X,K)>-keylocation(X,K)&+haskey(K)
 
-open(X,K)>-nexttolock(X,K)
+open(X,K)>-nexttolock(X,K) & ~open(X,K)
 
 goto(X,Y)>-location(X)
