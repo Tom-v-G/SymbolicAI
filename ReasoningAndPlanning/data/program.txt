@@ -1,3 +1,8 @@
+# Assignment 3 Symbolic AI
+# Lisa Schouten    s3162915
+# Tom van Gelooven s1853686
+# 2-12-2022
+
 #In the think step, your agent evaluates the program rules.
 #It does so by doing inference on the union of the program rules (this file) and the belief base.
 #The program rules define how and when actions need to be added to the intentions, goals need to be addopted and beliefs needs to be added or deleted
@@ -14,9 +19,8 @@ nexttolock(X,K)&haskey(K)&location(X)>_open(X,K)
 
 location(X)&link(X,Y)>_goto(X,Y)
 
-keylocation(X,K) & location(X) &!haskey(K) >*grab(X,K)
+keylocation(X,K) &!haskey(K) >*grab(X,K)
 
-#haskey(K) & nexttolock(X,K) & location(X) >*open(X,K)
 nexttolock(X,K) >*open(X,K)
 
-location(X) & link(X,Y) & !visited(Y) > *location(Y)
+link(X,Y) & !visited(Y) > *location(Y)

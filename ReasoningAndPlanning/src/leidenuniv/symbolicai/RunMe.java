@@ -10,7 +10,7 @@ public class RunMe {
 	// It loads a world, makes an agent and then keeps the agent alive by allowing it to complete it's sense think act cycle 
 	public static void main(String[] args) {
 		//Load a world
-		Maze w=new Maze(new File("data/prison3.txt"));
+		Maze w=new Maze(new File("data/prison.txt"));
 		//Create an agent
 		//Agent a=new MyAgent();
 		Agent a=new MyAgent();
@@ -23,7 +23,7 @@ public class RunMe {
 		//If you need to test on a simpler file, you may use this one and comment out all the other KBs:
 //		a.loadKnowledgeBase("program", new File("data/family.txt"));
 //		System.out.println(a.forwardChain(a.programRules).toString());
-//		System.out.println("Done");
+		//System.out.println("Done");
 		
 		Scanner io= new Scanner(System.in);
 		

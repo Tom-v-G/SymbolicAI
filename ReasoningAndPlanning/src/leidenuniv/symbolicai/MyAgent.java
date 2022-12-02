@@ -1,3 +1,8 @@
+//Assignment 3 Symbolic AI
+// Lisa Schouten    s3162915
+// Tom van Gelooven s1853686
+// 2-12-2022
+
 package leidenuniv.symbolicai;
 
 import java.util.Collection;
@@ -10,8 +15,6 @@ import leidenuniv.symbolicai.logic.Sentence;
 import leidenuniv.symbolicai.logic.Term;
 
 public class MyAgent extends Agent {
-	
-	
 
 	@Override
 	public KB forwardChain(KB kb) {
@@ -21,9 +24,9 @@ public class MyAgent extends Agent {
 		//These are then processed by processFacts() (which is already implemented for you)
 		//HINT: You should assume that forwardChain only allows *bound* predicates to be added to the facts list for now.
 		
-		HashMap<String, Predicate> facts = new HashMap<String, Predicate>();
+		HashMap<String, Predicate> facts = new HashMap<String, Predicate>(); //list of facts
 		HashMap<String, Predicate> operators = new HashMap<String, Predicate>(); //for operators which are not used in inference
-		Vector<Sentence> rules = new Vector<Sentence>();
+		Vector<Sentence> rules = new Vector<Sentence>(); //rules on which we forwardchain
 		
 		//first add all facts to a HashMap and add rules to a vector for looping
 		for(Sentence sentence : kb.rules()) {
@@ -39,16 +42,14 @@ public class MyAgent extends Agent {
 					if(conclusion.isAction()) { //operators are stored separately
 						if(!operators.containsKey(conclusion.toString())) { //only add new operators
 							operators.put(conclusion.toString(), conclusion);
-							//System.out.println(conclusion.toString() + " added to Operators");
 						}
 					}
 					else if(!facts.containsKey(conclusion.toString())) { //only add new facts
 						facts.put(conclusion.toString(), conclusion);
-						//System.out.println(conclusion.toString() + " added to Facts");
 					}
 				}
 			}
-			else { //if there are conditions
+			else { //if there are conditions it is a rule
 				rules.add(sentence);
 			}
 		}
@@ -60,11 +61,10 @@ public class MyAgent extends Agent {
 			for(Sentence rule: rules) {
 				Vector<HashMap<String, String>> allSubstitutions = new Vector<HashMap<String, String>>();
 				HashMap<String, String> substitution = new HashMap<String, String>();
-				if(findAllSubstitions(allSubstitutions, substitution, rule.conditions, facts)) {
-					//System.out.println("Possible substitutions:" + allSubstitutions.toString());
-					for(HashMap<String, String> possibleSubstitution : allSubstitutions) {
-						for(Predicate conclusion: rule.conclusions) {
-							Predicate newFact = substitute(conclusion, possibleSubstitution);
+				if(findAllSubstitions(allSubstitutions, substitution, rule.conditions, facts)) { //if there are substitutions for which the conditions unify with the facts
+					for(HashMap<String, String> possibleSubstitution : allSubstitutions) { //loop over substitutions
+						for(Predicate conclusion: rule.conclusions) { //add all substituted conclusions as facts or operators
+							Predicate newFact = substitute(conclusion, possibleSubstitution); 
 							if(newFact.add) { //add predicates are added to fact kb
 								String toBeAdded = newFact.toString();
 								Predicate addFact = new Predicate(toBeAdded.substring(1, toBeAdded.length()));
@@ -77,23 +77,17 @@ public class MyAgent extends Agent {
 								if(!operators.containsKey(newFact.toString())) { //only add new operators
 									operators.put(newFact.toString(), newFact);	
 									factAdded = true;
-									//System.out.println(newFact.toString() + " added to Operators");
 								}
 							}
 							else if(!facts.containsKey(newFact.toString())) { //only add new facts
 								facts.put(newFact.toString(), newFact);
 								factAdded = true; //new fact was added
-								//System.out.println(newFact.toString() + " added to Facts");
 							}
 						}
 					}
 				}
 			}
-			//System.out.println("Currently attained facts:");
-			//System.out.println(facts.toString());
-		} while(factAdded);
-
-		//TODO include addition operator
+		} while(factAdded); //stop when no new facts are added
 		
 		//add facts and operators to KB
 		facts.putAll(operators); //merge HashMaps
@@ -114,52 +108,51 @@ public class MyAgent extends Agent {
 		//conditions is the list of conditions you  still need to find a subst for (this list shrinks the further you get in the recursion).
 		//facts is the list of predicates you need to match against (find substitutions so that a predicate form the conditions unifies with a fact)
 		
-		if(conditions.isEmpty()) {
-			allSubstitutions.add(substitution);
-			//System.out.println("Added " + substitution.toString() + "to allSubstitutions\n");
+		if(conditions.isEmpty()) { //if all conditions are fullfilled
+			allSubstitutions.add(substitution); //add the substitution to the list
 			return true;
 		}
-		Predicate currentCondition = conditions.firstElement();
-		Vector<Predicate> copyConditions = new Vector<Predicate>(conditions);
-		copyConditions.remove(0);
-		currentCondition = substitute(currentCondition, substitution);
+		Predicate currentCondition = conditions.firstElement(); //take the first condition
+		Vector<Predicate> copyConditions = new Vector<Predicate>(conditions); //deepcopy the condition list
+		copyConditions.remove(0); //remove currentCondition from the copy
+		currentCondition = substitute(currentCondition, substitution); //substitute all known variables
 		
 		HashMap<String, String> currentSubstitution = new HashMap<String, String>();
-		boolean subCheck = false; //
+		boolean subCheck = false; //boolean to return
 		
-		if(currentCondition.eql) {
-			for( Predicate fact: facts.values()) {
-				for ( Term factterm: fact.getTerms()) {
-					Predicate f = new Predicate("=(" + factterm.term + "," + factterm.term + ")");
-					currentSubstitution = unifiesWith(currentCondition, f);
-					if (currentSubstitution != null) {
+		if(currentCondition.eql) { //if condition is an equality
+			for( Predicate fact: facts.values()) { 
+				for ( Term factterm: fact.getTerms()) { //loop over all terms of all facts
+					Predicate f = new Predicate("=(" + factterm.term + "," + factterm.term + ")"); //make an equality predicate with this term
+					currentSubstitution = unifiesWith(currentCondition, f); //check for unification
+					if (currentSubstitution != null) { //if it unifies
 						HashMap<String, String> copySubstitution = new HashMap<String, String>(substitution); 
 						for (HashMap.Entry<String, String> sub : currentSubstitution.entrySet()) {
-							copySubstitution.put(sub.getKey(), sub.getValue());
+							copySubstitution.put(sub.getKey(), sub.getValue()); //add the substitutions to the list
 						}
 						if( findAllSubstitions(allSubstitutions, copySubstitution, copyConditions, facts)) {
-							subCheck = true;
+							subCheck = true; //if the substitution is valid for all conditions return true
 						}
 					}
 				}
 			}
 		}
 		
-		else if(currentCondition.not) {
+		else if(currentCondition.not) { //if a not predicate
 			for( Predicate fact1: facts.values()) {
 				for( Predicate fact2: facts.values()) {
 					for ( Term factterm1: fact1.getTerms()) {
-						for ( Term factterm2: fact2.getTerms()) {
-							Predicate f = new Predicate("!=(" + factterm1.term + "," + factterm2.term + ")");
+						for ( Term factterm2: fact2.getTerms()) { //loop over all combinations of terms of all facts
+							Predicate f = new Predicate("!=(" + factterm1.term + "," + factterm2.term + ")"); //make not predicate
 							if(f.not()) {  //prevents !=(X,X)
-								currentSubstitution = unifiesWith(currentCondition, f);
+								currentSubstitution = unifiesWith(currentCondition, f); //check for unification
 								if (currentSubstitution != null) {
 									HashMap<String, String> copySubstitution = new HashMap<String, String>(substitution); 
 									for (HashMap.Entry<String, String> sub : currentSubstitution.entrySet()) {
-										copySubstitution.put(sub.getKey(), sub.getValue());
+										copySubstitution.put(sub.getKey(), sub.getValue()); //add substitution to list
 									}
 									if( findAllSubstitions(allSubstitutions, copySubstitution, copyConditions, facts)) {
-										subCheck = true;
+										subCheck = true; //if the substitution is valid for all conditions return true
 									}
 								}
 							}
@@ -169,32 +162,29 @@ public class MyAgent extends Agent {
 			}
 		}
 		
-		//als negation
-		else if(currentCondition.neg) {
-			for (Predicate fact: facts.values()) {
-				//System.out.println("Trying" + currentCondition.toString() + " with " + fact.toString());
-				currentSubstitution = unifiesWith(currentCondition, fact);
-				if(currentSubstitution != null) {
-					return false;
+		else if(currentCondition.neg) { //if the predicate is a negation
+			for (Predicate fact: facts.values()) { //loop over facts
+				currentSubstitution = unifiesWith(currentCondition, fact); //check for unification
+				if(currentSubstitution != null) { //if the predicate unifies
+					return false; //its negation does not
 				}
 			}
 			HashMap<String, String> copySubstitution = new HashMap<String, String>(substitution);
 			if( findAllSubstitions(allSubstitutions, copySubstitution, copyConditions, facts)) {
-				subCheck = true;
+				subCheck = true; //if the substitution is valid for all conditions return true
 			}
 		}
-		
-		//overige feiten	
-		else {
-			for (Predicate fact: facts.values()) {
-				currentSubstitution = unifiesWith(currentCondition, fact);
+			
+		else { //other predicates
+			for (Predicate fact: facts.values()) { //loop over facts
+				currentSubstitution = unifiesWith(currentCondition, fact); //check for unification
 				if (currentSubstitution != null) { //if there are possible substitutions
 					HashMap<String, String> copySubstitution = new HashMap<String, String>(substitution); 
 					for (HashMap.Entry<String, String> sub : currentSubstitution.entrySet()) {
-						copySubstitution.put(sub.getKey(), sub.getValue());
+						copySubstitution.put(sub.getKey(), sub.getValue()); //add substitutions to list
 					}
 					if( findAllSubstitions(allSubstitutions, copySubstitution, copyConditions, facts)) {
-						subCheck = true;
+						subCheck = true; //if the substitution is valid for all conditions return true
 					}
 				}
 			}
@@ -212,7 +202,7 @@ public class MyAgent extends Agent {
 		//So: unifiesWith("human(X)","human(joost)") returns X=joost, while unifiesWith("human(joost)","human(X)") returns null 
 		//If no subst is found it returns null
 		
-		if(! p.getName().equals(f.getName())) {
+		if(! p.getName().equals(f.getName())) { //if the names differ predicates cannot unify
 			return null;
 		}
 		
@@ -224,7 +214,7 @@ public class MyAgent extends Agent {
 		if(fTerms.size() != pTerms.size()) { //predicates of unequal size can never unify
 			return null;
 		}
-		for (int i = 0; i < fTerms.size(); i++) {
+		for (int i = 0; i < fTerms.size(); i++) { //loop over terms
 			if(pTerms.get(i).var) {
 				substitutions.put(pTerms.get(i).term, fTerms.get(i).term); //if the p-term is a variable, add the constant term of f as a valid substitution
 			}
@@ -234,10 +224,7 @@ public class MyAgent extends Agent {
 				}
 			}
 		}
-		//System.out.println(p.toString() + " unifies with " + f.toString());
-//		if(p.neg) {
-//			return null;
-//		}
+
 		return substitutions;
 	}
 
@@ -247,9 +234,9 @@ public class MyAgent extends Agent {
 		//(only if a key is present in s matching the variable name of course)
 		//Use Term.substitute(s)
 		
-		Predicate copy = new Predicate(old.toString()); 
+		Predicate copy = new Predicate(old.toString());  //deepcopy the old predicate
 		
-		for (Term X : copy.getTerms()) {
+		for (Term X : copy.getTerms()) { //substitute the terms
 			X.substitute(s);
 		}
 		
@@ -263,16 +250,14 @@ public class MyAgent extends Agent {
 		//Ends at maxDepth
 		//Predicate goal is the goal predicate to find a plan for.
 		//Return null if no plan is found.
-		//System.out.println("Starting search for " + goal.toString());
-		Plan goalPlan = new Plan();
-		for(int i = 0; i < maxDepth; i++) {
-			//System.out.println("Depth: " + i);
-			goalPlan = depthFirst(i+1, 0, kb, goal, new Plan());
-			if(goalPlan != null) {
+
+		Plan goalPlan = new Plan(); 
+		for(int i = 0; i < maxDepth; i++) { //iterate over depths until maxdepth
+			goalPlan = depthFirst(i+1, 0, kb, goal, new Plan()); //call depthFirst
+			if(goalPlan != null) { //if a plan is found we are done
 				break;
 			}
-		}
-		
+		}	
 		return goalPlan;
 	}
 
@@ -285,36 +270,31 @@ public class MyAgent extends Agent {
 		//Returns null if capped or if there are no (more) actions to perform in one node (state)
 		//HINT: make use of think() and act() using the local state for the node in the search you are in.
 		
-		KB currentBelieves = new KB().union(state);
-		KB currentDesires = new KB();
-		KB currentIntentions = new KB();
+		KB currentBelieves = new KB().union(state); //deepcopy belief kb
+		KB currentDesires = new KB(); 
 		
-		//System.out.println("Partial plan: " + partialPlan.toString());
-		
-		think(currentBelieves, currentDesires, currentIntentions);
-		for(Predicate step : partialPlan) {
-			act(null, step, currentBelieves, currentDesires);
+		think(currentBelieves, currentDesires, null); //update desires and beliefs
+		for(Predicate step : partialPlan) { 
+			act(null, step, currentBelieves, currentDesires); //perform steps in partialPlan
 		}
-		KB currentNewIntentions = new KB();
-		think(currentBelieves, currentDesires, currentNewIntentions);
-		
-		//System.out.println("Current Intentions: \n" + currentIntentions.toString());
-		//System.out.println("Current desires: \n"  + currentDesires.toString());
-		if(!currentDesires.contains(goal)) {
-			return partialPlan;
+
+		if(!currentDesires.contains(goal)) { //return plan if the goal is fullfilled
+			return partialPlan; 
 		}
+		
 		else {
-			if(depth == maxDepth) {
-				//System.out.println("Max Depth Reached");
+			if(depth == maxDepth) { //break if max depth is reached
 				return null;
 			}
-			for(Sentence s_intention : currentNewIntentions.rules()) {
+			KB currentIntentions = new KB(); 
+			think(currentBelieves, currentDesires, currentIntentions); //generate possible intentions
+
+			for(Sentence s_intention : currentIntentions.rules()) { //loop over intentions
 				Predicate intention = new Predicate(s_intention);
-				//System.out.println("Visiting node: " + intention.toString());
-				Plan copyPlan = new Plan(partialPlan);
-				copyPlan.add(intention);
-				Plan toReturn = depthFirst(maxDepth, depth + 1, state, goal, copyPlan);
-				if(toReturn != null) {
+				Plan copyPlan = new Plan(partialPlan); //deepcopy partial plan
+				copyPlan.add(intention); //add intention to plan
+				Plan toReturn = depthFirst(maxDepth, depth + 1, state, goal, copyPlan); //recursive call
+				if(toReturn != null) { //if a plan is found return it
 					return toReturn;
 				}	
 			}

@@ -1,3 +1,8 @@
+# Assignment 3 Symbolic AI
+# Lisa Schouten    s3162915
+# Tom van Gelooven s1853686
+# 2-12-2022
+
 #In the act phase, the agent will try one action in the environment. 
 #If the action fails, the agent will not have executed the action in the world, and the agent will go to the next cycle.
 #If the action succeeds, the action rules (this file) are evaluated using inference on the union of the action rules, the beliefs and the desires.
