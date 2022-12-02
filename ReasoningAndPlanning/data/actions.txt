@@ -4,8 +4,8 @@
 #This is how possible postconditions are triggered. Note that you cannot form new intentions in this phase, so, world actions cannot be postconditions of actions!!!
 #Add your action postcondition rules below:
 
-grab(X,K)>-keylocation(X,K)&+haskey(K)&~haveKey(K)
+grab(X,K)>-keylocation(X,K) & +haskey(K) & ~grab(X,K)
 
 open(X,K)>-nexttolock(X,K) & ~open(X,K)
 
-goto(X,Y)>-location(X) & +visited(Y) & ~location(Y)
+goto(X,Y)>-location(X) & +location(Y) & ~location(Y)

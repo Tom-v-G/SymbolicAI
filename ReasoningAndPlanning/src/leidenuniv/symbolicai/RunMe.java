@@ -10,7 +10,7 @@ public class RunMe {
 	// It loads a world, makes an agent and then keeps the agent alive by allowing it to complete it's sense think act cycle 
 	public static void main(String[] args) {
 		//Load a world
-		Maze w=new Maze(new File("data/prison.txt"));
+		Maze w=new Maze(new File("data/prison3.txt"));
 		//Create an agent
 		//Agent a=new MyAgent();
 		Agent a=new MyAgent();

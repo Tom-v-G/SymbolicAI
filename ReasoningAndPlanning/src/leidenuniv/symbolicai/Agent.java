@@ -17,7 +17,7 @@ public abstract class Agent {
 	KB believes,desires, intentions;//these are dynamic facts, believes are facts, intentions are actions that are possible, desires are goal predicates
 	//boolean HUMAN_DECISION=true;//change to false if you want the decide step to make the decision rather than you (check code there)
 	boolean HUMAN_DECISION=false;//change to false if you want the decide step to make the decision rather than you (check code there)
-	boolean DEBUG=true;
+	boolean DEBUG=false;
 	//boolean DEBUG=false;
 	
 	public Agent() {
@@ -37,8 +37,12 @@ public abstract class Agent {
 	}
 	public void cycle(Maze w) {
 		intentions=new KB(); //clear the list of intentions (=possible actions), as we start a cycle
+		//System.out.println("----------------------------\n Sense step \n---------------------------");
 		sense(w);
+		//System.out.println("----------------------------\n Think step \n---------------------------");
 		think(believes,desires,intentions);
+		//System.out.println("----------------------------\n Act step \n---------------------------");
+		System.out.println("desires: \n" + desires.toString());
 		act(w, decide(HUMAN_DECISION), believes, desires);
 	}
 	public void sense(Maze w) {
@@ -62,7 +66,7 @@ public abstract class Agent {
 		//IMPORTANT: b d and i are changed as they are passed by reference.
 		//IMPORTANT: the reason think has b d and i as parameters is so that you can make clever use of think() when you implement planning later.
 		KB facts=forwardChain(programRules.union(b)); 
-		System.out.println("THINK INFERENCE:\n"+facts);//uncomment this if you want to know what facts your forward chaining inference produces
+		//System.out.println("THINK INFERENCE:\n"+facts);//uncomment this if you want to know what facts your forward chaining inference produces
 		processFacts(facts, b, d, i, DEBUG);
 	}
 	public Predicate decide(boolean humanActor) {

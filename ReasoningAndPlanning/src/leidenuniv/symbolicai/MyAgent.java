@@ -169,24 +169,33 @@ public class MyAgent extends Agent {
 			}
 		}
 		
-		//als niet =(X,Y) of !=(X,Y)
+		//als negation
+		else if(currentCondition.neg) {
+			for (Predicate fact: facts.values()) {
+				//System.out.println("Trying" + currentCondition.toString() + " with " + fact.toString());
+				currentSubstitution = unifiesWith(currentCondition, fact);
+				if(currentSubstitution != null) {
+					return false;
+				}
+			}
+			HashMap<String, String> copySubstitution = new HashMap<String, String>(substitution);
+			if( findAllSubstitions(allSubstitutions, copySubstitution, copyConditions, facts)) {
+				subCheck = true;
+			}
+		}
+		
+		//overige feiten	
 		else {
 			for (Predicate fact: facts.values()) {
 				currentSubstitution = unifiesWith(currentCondition, fact);
-				if(currentCondition.neg && currentSubstitution == null) {
+				if (currentSubstitution != null) { //if there are possible substitutions
 					HashMap<String, String> copySubstitution = new HashMap<String, String>(substitution); 
+					for (HashMap.Entry<String, String> sub : currentSubstitution.entrySet()) {
+						copySubstitution.put(sub.getKey(), sub.getValue());
+					}
 					if( findAllSubstitions(allSubstitutions, copySubstitution, copyConditions, facts)) {
 						subCheck = true;
 					}
-				}
-				else if (!currentCondition.neg && currentSubstitution != null) { //if there are possible substitutions
-						HashMap<String, String> copySubstitution = new HashMap<String, String>(substitution); 
-						for (HashMap.Entry<String, String> sub : currentSubstitution.entrySet()) {
-							copySubstitution.put(sub.getKey(), sub.getValue());
-						}
-						if( findAllSubstitions(allSubstitutions, copySubstitution, copyConditions, facts)) {
-							subCheck = true;
-						}
 				}
 			}
 		}
@@ -226,7 +235,9 @@ public class MyAgent extends Agent {
 			}
 		}
 		//System.out.println(p.toString() + " unifies with " + f.toString());
-		
+//		if(p.neg) {
+//			return null;
+//		}
 		return substitutions;
 	}
 
@@ -252,10 +263,10 @@ public class MyAgent extends Agent {
 		//Ends at maxDepth
 		//Predicate goal is the goal predicate to find a plan for.
 		//Return null if no plan is found.
-		System.out.println("Starting search");
+		//System.out.println("Starting search for " + goal.toString());
 		Plan goalPlan = new Plan();
 		for(int i = 0; i < maxDepth; i++) {
-			System.out.println(i);
+			//System.out.println("Depth: " + i);
 			goalPlan = depthFirst(i+1, 0, kb, goal, new Plan());
 			if(goalPlan != null) {
 				break;
@@ -273,28 +284,39 @@ public class MyAgent extends Agent {
 		//Returns (bubbles back through recursion) the plan when the state entails the goal predicate
 		//Returns null if capped or if there are no (more) actions to perform in one node (state)
 		//HINT: make use of think() and act() using the local state for the node in the search you are in.
-		if(depth == maxDepth) {
-			return null;
-		}
 		
 		KB currentBelieves = new KB().union(state);
 		KB currentDesires = new KB();
 		KB currentIntentions = new KB();
 		
+		//System.out.println("Partial plan: " + partialPlan.toString());
+		
 		think(currentBelieves, currentDesires, currentIntentions);
+		for(Predicate step : partialPlan) {
+			act(null, step, currentBelieves, currentDesires);
+		}
+		KB currentNewIntentions = new KB();
+		think(currentBelieves, currentDesires, currentNewIntentions);
+		
+		//System.out.println("Current Intentions: \n" + currentIntentions.toString());
+		//System.out.println("Current desires: \n"  + currentDesires.toString());
 		if(!currentDesires.contains(goal)) {
 			return partialPlan;
 		}
 		else {
-			for(Sentence s_intention : currentIntentions.rules()) {
+			if(depth == maxDepth) {
+				//System.out.println("Max Depth Reached");
+				return null;
+			}
+			for(Sentence s_intention : currentNewIntentions.rules()) {
 				Predicate intention = new Predicate(s_intention);
-				System.out.println(intention.toString());
-				KB actBelieves = new KB().union(currentBelieves);
-				KB actDesires = new KB().union(currentDesires);
+				//System.out.println("Visiting node: " + intention.toString());
 				Plan copyPlan = new Plan(partialPlan);
 				copyPlan.add(intention);
-				act(null, intention, actBelieves, actDesires);
-				return depthFirst(maxDepth, depth + 1, actBelieves, goal, copyPlan);	
+				Plan toReturn = depthFirst(maxDepth, depth + 1, state, goal, copyPlan);
+				if(toReturn != null) {
+					return toReturn;
+				}	
 			}
 		}
 		
